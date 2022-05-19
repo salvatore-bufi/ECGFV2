@@ -16,3 +16,4 @@ from elliot.dataset.modular_loaders.kg.kgflex import KGFlexLoader
 from elliot.dataset.modular_loaders.kg.kahfm_kgrec import KAHFMLoader
 from elliot.dataset.modular_loaders.kg.kgin import KGINLoader
 from elliot.dataset.modular_loaders.kg.kgin_tsv import KGINTSVLoader
+from elliot.dataset.modular_loaders.textual.salvatore_attribute import SalvatoreAttributes

@@ -40,7 +40,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.num_users = num_users
         self.num_items = num_items
         self.embed_k = embed_k
-        self.embed_f = 20
+        self.embed_f = 10
         self.learning_rate = learning_rate
         self.l_w = l_w
         self.n_layers = n_layers

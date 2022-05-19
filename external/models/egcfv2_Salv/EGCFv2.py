@@ -37,6 +37,7 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
         ]
         self.autoset_params()
 
+        # TODO: Spostare embedding nel modello
         self._side_edge_textual = self._data.side_information.InteractionsTextualAttributes
 
         row, col = data.sp_i_train.nonzero()

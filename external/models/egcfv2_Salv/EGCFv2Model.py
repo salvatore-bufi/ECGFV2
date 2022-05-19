@@ -7,7 +7,7 @@ import torch
 import torch_geometric
 import numpy as np
 import random
-
+from torch_sparse import matmul
 
 class EGCFv2Model(torch.nn.Module, ABC):
     def __init__(self,
@@ -40,10 +40,13 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.num_users = num_users
         self.num_items = num_items
         self.embed_k = embed_k
+        self.embed_f = 20
         self.learning_rate = learning_rate
         self.l_w = l_w
         self.n_layers = n_layers
         self.alpha = torch.tensor([1 / (k + 1) for k in range(self.n_layers + 1)])
+
+        self.edge_features = edge_features
 
         self.node_node_adj = node_node_adj
         self.rows, self.cols = torch.tensor(rows, dtype=torch.int64), torch.tensor(cols, dtype=torch.int64)
@@ -51,6 +54,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
         # Initialization of embeddings // u = user, i = items  |  t = textual, none = collaborative
         # - Gu , Gut -> dim = (n_items, dim_emb)
         # - Gi , Git -> dim = (n_user, dim_emb)
+
         self.Gu = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
         self.Gu.to(self.device)
@@ -58,28 +62,12 @@ class EGCFv2Model(torch.nn.Module, ABC):
             torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embed_k))))
         self.Gi.to(self.device)
 
-        self.Gut = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
-        self.Gut.to(self.device)
-        self.Git = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embed_k))))
-        self.Git.to(self.device)
-
-        # edge_features dim = (n_interaz, emb_edge) , 1 edge for each interaction (54311, dim2)
-        # edge_embeddings_interactions dim = (2*n_interaz, emb_edge) , (108622,64)
-        self.edge_embeddings_interactions = torch.tensor(edge_features, dtype=torch.float32, device=self.device)
-        self.edge_embeddings_interactions = torch.cat([self.edge_embeddings_interactions,
-                                                       self.edge_embeddings_interactions], dim=0)
         self.feature_dim = edge_features.shape[1]
 
-        # create node-node collaborative
-        propagation_node_node_collab_list = []
-        for _ in range(self.n_layers):
-            propagation_node_node_collab_list.append((LGConv(), 'x, edge_index -> x'))
-
-        self.node_node_collab_network = torch_geometric.nn.Sequential('x, edge_index',
-                                                                      propagation_node_node_collab_list)
-        self.node_node_collab_network.to(self.device)
+        self.F = torch.nn.Parameter(
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_f)))
+        )
+        self.F.to(self.device)
 
         # create node-node textual
         propagation_node_node_textual_list = []
@@ -92,7 +80,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.node_node_textual_network.to(self.device)
 
         # projection layer 4 edge emb: dim (N, M) -- to --> dim (N, dim_emb). N = no of interactions
-        self.projection = torch.nn.Linear(self.edge_embeddings_interactions.shape[-1], self.embed_k)
+        self.projection = torch.nn.Linear(self.embed_f, self.embed_k)
         self.projection.to(self.device)
 
         self.softplus = torch.nn.Softplus()
@@ -101,8 +89,8 @@ class EGCFv2Model(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
         node_node_collab_emb = [torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)]
-        node_node_textual_emb = [torch.cat((self.Gut.to(self.device), self.Git.to(self.device)), 0)]
-        edge_embeddings_interactions_projected = self.projection(self.edge_embeddings_interactions)
+        edge_embeddings = matmul(self.edge_features, self.F)
+        edge_embeddings_interactions_projected = self.projection(edge_embeddings)
 
         for layer in range(self.n_layers):
             user_item_embeddings_interactions = torch.cat([

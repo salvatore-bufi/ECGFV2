@@ -14,6 +14,8 @@ from .EGCFv2Model import EGCFv2Model
 
 from torch_sparse import SparseTensor
 
+from .loader import load_dataset
+
 
 class EGCFv2(RecMixin, BaseRecommenderModel):
     r"""
@@ -33,11 +35,11 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             ("_emb", "emb", "emb", 64, int, None),
             ("_n_layers", "n_layers", "n_layers", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
-            ("_loader", "loader", "loader", 'InteractionsTextualAttributes', str, None)
+            ("_edge_features_path", "edge_features_path", "edge_features_path", None, str, None)
         ]
         self.autoset_params()
 
-        self._side_edge_textual = self._data.side_information.InteractionsTextualAttributes
+
 
         row, col = data.sp_i_train.nonzero()
         col = [c + self._num_users for c in col]
@@ -49,7 +51,18 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
                                           sparse_sizes=(self._num_users + self._num_items,
                                                         self._num_users + self._num_items))
 
-        edge_features = self._side_edge_textual.object.get_all_features()
+        edge_features = load_dataset(self._edge_features_path, default_path=False)
+        edge_features['user'] = edge_features['user'].apply(lambda x: self._data.public_users[x])
+        edge_features['item'] = edge_features['item'].apply(lambda x: self._data.public_items[x])
+
+        x = edge_features.explode('feature_path')
+        x['val'] = np.sign(x['feature_path'])
+        x['feature_path'] = np.abs(x['feature_path']) - 1
+
+        edge_features = SparseTensor(row=torch.tensor(x.index, dtype=torch.int64),
+                                     col=torch.tensor(x['feature_path'], dtype=torch.int64),
+                                     value=torch.tensor(x['val'], dtype=torch.int64),
+                                     sparse_sizes=(self._data.transactions, len(x['feature_path'].unique())))
 
         self._model = EGCFv2Model(
             num_users=self._num_users,
@@ -90,10 +103,10 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
     def get_recommendations(self, k: int = 100):
         predictions_top_k_test = {}
         predictions_top_k_val = {}
-        gu, gi, gut, git = self._model.propagate_embeddings(evaluate=True)
+        gut, git = self._model.propagate_embeddings(evaluate=True)
         for index, offset in enumerate(range(0, self._num_users, self._batch_size)):
             offset_stop = min(offset + self._batch_size, self._num_users)
-            predictions = self._model.predict(gu[offset: offset_stop], gi, gut[offset: offset_stop], git)
+            predictions = self._model.predict( gut[offset: offset_stop], git)
             recs_val, recs_test = self.process_protocol(k, predictions, offset, offset_stop)
             predictions_top_k_val.update(recs_val)
             predictions_top_k_test.update(recs_test)

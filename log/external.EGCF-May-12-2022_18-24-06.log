@@ -1,0 +1,16 @@
+2022-05-12 18:24:11.605918: I Loading parameters
+2022-05-12 18:24:11.606458: I Parameter lr set to 0.0007155270067836332
+2022-05-12 18:24:11.606618: I Parameter emb set to 64
+2022-05-12 18:24:11.606750: I Parameter tr_e set to True
+2022-05-12 18:24:11.606876: I Parameter aggr set to add
+2022-05-12 18:24:11.607049: I Parameter nn_d set to 0.1
+2022-05-12 18:24:11.607225: I Parameter ee_d set to 0.1
+2022-05-12 18:24:11.607394: I Parameter ne_d set to 0.1
+2022-05-12 18:24:11.607565: I Parameter att_d set to 0.1
+2022-05-12 18:24:11.607888: I Parameter t set to 1.0
+2022-05-12 18:24:11.608118: I Parameter w_proj set to [64]
+2022-05-12 18:24:11.608278: I Parameter w_n set to [64]
+2022-05-12 18:24:11.608438: I Parameter w_e set to [64]
+2022-05-12 18:24:11.608592: I Parameter w_ne set to [64]
+2022-05-12 18:24:11.608716: I Parameter l_w set to 0.0
+2022-05-12 18:24:11.608834: I Parameter loader set to InteractionsTextualAttributes

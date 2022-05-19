@@ -1,0 +1,8 @@
+2022-05-14 12:23:43.729444: I Loading parameters
+2022-05-14 12:23:43.729564: I Parameter lr set to 0.0007155270067836332
+2022-05-14 12:23:43.729620: I Parameter emb set to 64
+2022-05-14 12:23:43.729757: I Parameter n_layers set to 2
+2022-05-14 12:23:43.729806: I Parameter l_w set to 0.0
+2022-05-14 12:23:43.729848: I Parameter loader set to InteractionsTextualAttributes
+2022-05-14 13:31:38.543442: I Epoch 20/400 loss 3.09146
+2022-05-14 13:31:38.543664: I ******************************************

@@ -56,14 +56,15 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
         edge_features['user'] = edge_features['user'].apply(lambda x: self._data.public_users[x])
         edge_features['item'] = edge_features['item'].apply(lambda x: self._data.public_items[x])
 
-        x = edge_features.explode('feature_path')
-        x['val'] = np.sign(x['feature_path'])
-        x['feature_path'] = np.abs(x['feature_path']) - 1
+        edge_features = edge_features.explode('feature_path')
+        edge_features['val'] = np.sign(edge_features['feature_path'])
+        edge_features['feature_path'] = np.abs(edge_features['feature_path']) - 1
 
-        edge_features = SparseTensor(row=torch.tensor(x.index, dtype=torch.int64),
-                                     col=torch.tensor(x['feature_path'].astype(int).to_numpy(), dtype=torch.int64),
-                                     value=torch.tensor(x['val'].astype(int).to_numpy(), dtype=torch.int64),
-                                     sparse_sizes=(self._data.transactions, len(x['feature_path'].unique()))).to(torch.device('cuda'))
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
+                                     col=torch.tensor(edge_features['feature_path'].astype(int).to_numpy(), dtype=torch.int64),
+                                     value=torch.tensor(edge_features['val'].astype(int).to_numpy(), dtype=torch.int64),
+                                     sparse_sizes=(self._data.transactions, len(edge_features['feature_path'].unique()))).to(device)
 
         self._model = EGCFv2Model(
             num_users=self._num_users,
@@ -77,7 +78,7 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             rows=row,
             cols=col,
             random_seed=self._seed
-        ).to(torch.device('cuda'))
+        ).to(device)
 
     @property
     def name(self):

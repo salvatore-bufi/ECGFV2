@@ -35,7 +35,8 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             ("_emb", "emb", "emb", 64, int, None),
             ("_n_layers", "n_layers", "n_layers", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
-            ("_edge_features_path", "edge_features_path", "edge_features_path", None, str, None)
+            ("_edge_features_path", "edge_features_path", "edge_features_path", None, str, None),
+            ("_emb_f", "emb_f", "emb_f", 10, int, None)
         ]
         self.autoset_params()
 
@@ -71,6 +72,7 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             num_items=self._num_items,
             learning_rate=self._lr,
             embed_k=self._emb,
+            embed_f=self._emb_f,
             l_w=self._l_w,
             n_layers=self._n_layers,
             edge_features=edge_features,

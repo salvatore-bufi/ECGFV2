@@ -81,6 +81,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
                                                                        propagation_node_node_textual_list)
         self.node_node_textual_network.to(self.device)
 
+
         # projection layer 4 edge emb: dim (N, M) -- to --> dim (N, dim_emb). N = no of interactions
         self.projection = torch.nn.Linear(self.embed_f, self.embed_k)
         self.projection.to(self.device)
@@ -94,6 +95,8 @@ class EGCFv2Model(torch.nn.Module, ABC):
         edge_embeddings = matmul(self.edge_features, self.F)
         edge_embeddings_interactions_projected = self.projection(edge_embeddings)
         edge_embeddings_interactions_projected = torch.cat([edge_embeddings_interactions_projected, edge_embeddings_interactions_projected], dim=0)
+        # added
+        # edge_embeddings_interactions_projected = torch.cat([edge_embeddings, edge_embeddings], dim=0)
 
         for layer in range(self.n_layers):
             user_item_embeddings_interactions = torch.cat([

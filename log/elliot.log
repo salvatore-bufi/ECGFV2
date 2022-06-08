@@ -29204,3 +29204,10 @@
 2022-06-07 10:23:04.148057: I SEntropy	5.25101
 2022-06-07 10:23:04.148111: I EFD	0.91139
 2022-06-07 10:23:04.148164: I EPC	0.10323
+2022-06-08 15:18:25.062036: I Start experiment
+2022-06-08 15:18:25.080723: I There will be the splitting
+2022-06-08 15:18:56.691069: I Start experiment
+2022-06-08 15:18:56.695146: I There will be the splitting
+2022-06-08 15:18:56.717012: I /Users/albertomancino/PycharmProjects/ECGFV2/data/yahoo-movies/dataset.tsv - Loaded
+2022-06-08 15:18:57.058659: I Test Fold 0
+2022-06-08 15:18:57.474785: I Statistics	Users:	1552	Items:	1050	Transactions:	35045	Sparsity:	0.9784947226313205

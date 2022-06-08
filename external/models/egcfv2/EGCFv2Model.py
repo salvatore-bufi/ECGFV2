@@ -110,7 +110,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
                              self.node_node_adj.to(self.device),
                              user_item_embeddings_interactions.to(self.device),
                              item_user_embeddings_interactions.to(self.device),
-                             edge_embeddings_interactions_projected.to(self.device))]
+                             edge_embeddings_interactions.to(self.device))]
                 self.node_node_textual_network.train()
             else:
                 # node-node textual graph

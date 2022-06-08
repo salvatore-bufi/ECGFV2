@@ -4,7 +4,7 @@ experiment:
     strategy: fixed
     train_path: ../../data/{0}/train.tsv
     test_path: ../../data/{0}/test.tsv
-  dataset: yahoo
+  dataset: yahoo-movies
   prefiltering:
     strategy: iterative_k_core
     core: 10

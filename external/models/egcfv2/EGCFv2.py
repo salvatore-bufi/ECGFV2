@@ -35,8 +35,7 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             ("_emb", "emb", "emb", 64, int, None),
             ("_n_layers", "n_layers", "n_layers", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
-            ("_edge_features_path", "edge_features_path", "edge_features_path", None, str, None),
-            ("_emb_f", "emb_f", "emb_f", 10, int, None)
+            ("_edge_features_path", "edge_features_path", "edge_features_path", None, str, None)
         ]
         self.autoset_params()
 
@@ -61,12 +60,12 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
         edge_features['val'] = np.sign(edge_features['feature_path'])
 
         ### OLd ver
-        edge_features['feature_path'] = np.abs(edge_features['feature_path']) - 1
+        # edge_features['feature_path'] = np.abs(edge_features['feature_path']) - 1
 
         # ######## Version 2 ###################
-        # edge_features['feature_path'] = np.abs(edge_features['feature_path'])
-        # internal_mapping = {feature: i for i, feature in enumerate(edge_features['feature_path'].unique())}
-        # edge_features['feature_path'] = edge_features['feature_path'].map(internal_mapping)
+        edge_features['feature_path'] = np.abs(edge_features['feature_path'])
+        internal_mapping = {feature: i for i, feature in enumerate(edge_features['feature_path'].unique())}
+        edge_features['feature_path'] = edge_features['feature_path'].map(internal_mapping)
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
@@ -79,7 +78,6 @@ class EGCFv2(RecMixin, BaseRecommenderModel):
             num_items=self._num_items,
             learning_rate=self._lr,
             embed_k=self._emb,
-            embed_f=self._emb_f,
             l_w=self._l_w,
             n_layers=self._n_layers,
             edge_features=edge_features,

@@ -15,7 +15,6 @@ class EGCFv2Model(torch.nn.Module, ABC):
                  num_items,
                  learning_rate,
                  embed_k,
-                 embed_f,
                  l_w,
                  n_layers,
                  edge_features,
@@ -41,7 +40,6 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.num_users = num_users
         self.num_items = num_items
         self.embed_k = embed_k
-        self.embed_f = embed_f
         self.learning_rate = learning_rate
         self.l_w = l_w
         self.n_layers = n_layers
@@ -67,7 +65,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
 
         # embedding features
         self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_f)))
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
         )
         self.F.to(self.device)
 
@@ -82,9 +80,6 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.node_node_textual_network.to(self.device)
 
 
-        # projection layer 4 edge emb: dim (N, M) -- to --> dim (N, dim_emb). N = no of interactions
-        self.projection = torch.nn.Linear(self.embed_f, self.embed_k)
-        self.projection.to(self.device)
 
         self.softplus = torch.nn.Softplus()
 
@@ -93,10 +88,9 @@ class EGCFv2Model(torch.nn.Module, ABC):
     def propagate_embeddings(self, evaluate=False):
         node_node_textual_emb = [torch.cat((self.Gut.to(self.device), self.Git.to(self.device)), 0)]
         edge_embeddings = matmul(self.edge_features, self.F)
-        edge_embeddings_interactions_projected = self.projection(edge_embeddings)
-        edge_embeddings_interactions_projected = torch.cat([edge_embeddings_interactions_projected, edge_embeddings_interactions_projected], dim=0)
-        # added
-        # edge_embeddings_interactions_projected = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+
+        edge_embeddings_interactions = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+
 
         for layer in range(self.n_layers):
             user_item_embeddings_interactions = torch.cat([
@@ -126,7 +120,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
                          self.node_node_adj.to(self.device),
                          user_item_embeddings_interactions.to(self.device),
                          item_user_embeddings_interactions.to(self.device),
-                         edge_embeddings_interactions_projected.to(self.device))]
+                         edge_embeddings_interactions.to(self.device))]
 
 
         node_node_textual_emb = sum(

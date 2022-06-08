@@ -32,6 +32,4 @@ experiment:
       batch_size: 256
       emb: 64
       l_w: [quniform, 10e-5, 10, 100]
-      edge_features_path: data/yahoo/V2_decision_path_entropy_1.tsv
-      emb_f: 10
-      # emb_f = 10
+      edge_features_path: data/yahoo-movies/decision_path_entropy_1.tsv

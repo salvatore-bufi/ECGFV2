@@ -28,7 +28,7 @@ experiment:
       lr: [loguniform, -8.90775527898, -6.90775527898]
         # -6.90775527898, -4.90775527898
       n_layers: [quniform, 2, 3, 1]
-      epochs: 400
+      epochs: 150
       batch_size: 256
       emb: 64
       l_w: [quniform, 10e-5, 10, 100]

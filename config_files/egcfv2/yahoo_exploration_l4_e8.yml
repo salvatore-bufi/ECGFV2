@@ -12,7 +12,7 @@ experiment:
   evaluation:
     cutoffs: [10, 1]
     simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved, UserCoverage, Gini, SEntropy, EFD, EPC, PopREO, PopRSP, ACLT, APLT, ARP]
-  gpu: 0
+  gpu: 2
   external_models_path: ../../external/models/__init__.py
   models:
     external.EGCFv2:

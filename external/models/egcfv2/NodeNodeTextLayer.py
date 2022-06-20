@@ -27,27 +27,7 @@ class NodeNodeTextLayer(MessagePassing, ABC):
         original_edge_index = edge_index
         # original
         weights = torch.nn.functional.cosine_similarity(torch.mul(node_attr_rows, edge_attr), torch.mul(node_attr_cols, edge_attr), dim=1)
-        # new_fake
-        '''
-        v2
-        sim_edge_items = torch.nn.functional.cosine_similarity(edge_attr, node_attr_cols, dim=1)
-        sim_edge_user = torch.nn.functional.cosine_similarity(edge_attr, node_attr_rows, dim=1)
-        sim_user_items = torch.nn.functional.cosine_similarity(node_attr_cols, node_attr_rows, dim=1)
-
-        sim_edges = torch.mul(sim_edge_items, sim_edge_user)
-
-        sim_edges = sim_edges.view(-1, 1)
-        sim_user_items = sim_user_items.view(-1, 1)
-        weights = torch.nn.functional.cosine_similarity(sim_edges, sim_user_items)
-        
-        # v3
-        sim_edge_items = torch.nn.functional.cosine_similarity(edge_attr, node_attr_cols, dim=1)
-        sim_edge_user = torch.nn.functional.cosine_similarity(edge_attr, node_attr_rows, dim=1)
-        sim_edge_user = sim_edge_user.view(-1, 1)
-        sim_edge_items = sim_edge_items.view(-1, 1)
-        weights = torch.nn.functional.cosine_similarity(sim_edge_items, sim_edge_user)
-        '''
-        weights = self.activation(weights)  # cos(edge_attr, cos(node_attr_rows, node_attr_cols) ?
+        weights = self.activation(weights)
         edge_index = mul_nnz(edge_index, weights, layout='coo')
 
         if self.normalize:

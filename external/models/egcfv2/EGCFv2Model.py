@@ -138,7 +138,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
         return xui
 
     def predict(self,gut, git, **kwargs):
-        return  torch.matmul(gut.to(self.device), torch.transpose(git.to(self.device), 0, 1))
+        return torch.matmul(gut.to(self.device), torch.transpose(git.to(self.device), 0, 1))
 
     def train_step(self, batch):
         gut, git = self.propagate_embeddings()

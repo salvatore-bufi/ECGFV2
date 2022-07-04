@@ -1,0 +1,35 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../../data/{0}/train.tsv
+    test_path: ../../data/{0}/test.tsv
+  dataset: facebook-books
+  prefiltering:
+    strategy: iterative_k_core
+    core: 10
+  top_k: 50
+  evaluation:
+    cutoffs: [10, 1]
+    simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved, UserCoverage, Gini, SEntropy, EFD, EPC, PopREO, PopRSP, ACLT, APLT, ARP]
+  gpu: 2
+  external_models_path: ../../external/models/__init__.py
+  models:
+    external.EGCFv2:
+      meta:
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        verbose: True
+        save_weights: False
+        save_recs: False
+        validation_rate: 5
+        validation_metric: HR
+        restore: False
+      lr: [loguniform, -8.90775527898, -6.90775527898]
+        # -6.90775527898, -4.90775527898
+      n_layers: 4
+      epochs: 400
+      batch_size: 256
+      emb: 32
+      l_w: [loguniform, -16.11809565, -0.01]  # 10^(-7) , 100
+      edge_features_path: data/facebook-books/decision_path_entropy_1.tsv

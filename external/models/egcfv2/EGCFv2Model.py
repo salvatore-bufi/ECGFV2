@@ -48,6 +48,10 @@ class EGCFv2Model(torch.nn.Module, ABC):
 
         self.edge_features = edge_features
 
+        # FOR NN
+        self.edge_features = self.edge_features.to_dense()
+        self.edge_features = self.edge_features.type(torch.float32)
+
         self.node_node_adj = node_node_adj
         self.rows, self.cols = torch.tensor(rows, dtype=torch.int64), torch.tensor(cols, dtype=torch.int64)
 
@@ -86,6 +90,8 @@ class EGCFv2Model(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
         node_node_textual_emb = [torch.cat((self.Gut.to(self.device), self.Git.to(self.device)), 0)]
+
+        # with NN
         edge_embeddings = self.projection(self.edge_features)
         edge_embeddings_interactions = torch.cat([edge_embeddings, edge_embeddings], dim=0)
 

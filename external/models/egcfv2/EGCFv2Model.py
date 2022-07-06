@@ -51,6 +51,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
         # FOR NN
         self.edge_features = self.edge_features.to_dense()
         self.edge_features = self.edge_features.type(torch.float32)
+        self.edge_features.to(self.device)
 
         self.node_node_adj = node_node_adj
         self.rows, self.cols = torch.tensor(rows, dtype=torch.int64), torch.tensor(cols, dtype=torch.int64)

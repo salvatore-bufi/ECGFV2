@@ -99,6 +99,9 @@ class EGCFv2Model(torch.nn.Module, ABC):
             torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
         )
         self.F.to(self.device)
+        self.B = torch.nn.Parameter(torch.nn.init.xavier_normal_(torch.empty((self.edge_features.size(0), self.embed_k))))
+        self.B.to(self.device)
+
 
         # create node-node textual
         propagation_node_node_textual_list = []
@@ -119,6 +122,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
     def propagate_embeddings(self, evaluate=False):
         node_node_textual_emb = [torch.cat((self.Gut.to(self.device), self.Git.to(self.device)), 0)]
         edge_embeddings = matmul(self.edge_features, self.F)
+        edge_embeddings = edge_embeddings + self.B
 
         edge_embeddings_interactions = torch.cat([edge_embeddings, edge_embeddings], dim=0)
 

@@ -8,37 +8,7 @@ import numpy as np
 import random
 from torch_sparse import matmul
 
-        # #################### Old version
-        # for layer in range(self.n_layers):
-        #     user_item_embeddings_interactions = torch.cat([
-        #         node_node_textual_emb[layer][:self.num_users][self.rows],
-        #         node_node_textual_emb[layer][self.num_users:][self.cols - self.num_users]], dim=0)
-        #     item_user_embeddings_interactions = torch.cat([
-        #         node_node_textual_emb[layer][self.num_users:][self.cols - self.num_users],
-        #         node_node_textual_emb[layer][:self.num_users][self.rows]], dim=0)
-        #
-        #     if evaluate:
-        #         self.node_node_textual_network.eval()
-        #         with torch.no_grad():
-        #             # node-node textual graph
-        #             node_node_textual_emb += [list(
-        #                 self.node_node_textual_network.children()
-        #             )[layer](node_node_textual_emb[layer].to(self.device),
-        #                      self.node_node_adj.to(self.device),
-        #                      user_item_embeddings_interactions.to(self.device),
-        #                      item_user_embeddings_interactions.to(self.device),
-        #                      edge_embeddings_interactions.to(self.device))]
-        #         self.node_node_textual_network.train()
-        #     else:
-        #         # node-node textual graph
-        #         node_node_textual_emb += [list(
-        #             self.node_node_textual_network.children()
-        #         )[layer](node_node_textual_emb[layer].to(self.device),
-        #                  self.node_node_adj.to(self.device),
-        #                  user_item_embeddings_interactions.to(self.device),
-        #                  item_user_embeddings_interactions.to(self.device),
-        #                  edge_embeddings_interactions.to(self.device))]
-        # #################################
+
 
 class EGCFv2Model(torch.nn.Module, ABC):
     def __init__(self,
@@ -95,10 +65,8 @@ class EGCFv2Model(torch.nn.Module, ABC):
         self.feature_dim = edge_features.size(1)
 
         # embedding features
-        self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
-        )
-        self.F.to(self.device)
+        self.projection = torch.nn.Linear(self.feature_dim, self.embed_k)
+        self.projection.to(self.device)
 
         # create node-node textual
         propagation_node_node_textual_list = []
@@ -118,8 +86,7 @@ class EGCFv2Model(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
         node_node_textual_emb = [torch.cat((self.Gut.to(self.device), self.Git.to(self.device)), 0)]
-        edge_embeddings = matmul(self.edge_features, self.F)
-
+        edge_embeddings = self.projection(self.edge_features)
         edge_embeddings_interactions = torch.cat([edge_embeddings, edge_embeddings], dim=0)
 
 

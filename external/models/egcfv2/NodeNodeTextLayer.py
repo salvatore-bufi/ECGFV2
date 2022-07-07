@@ -19,9 +19,10 @@ def apply_norm(original_edge_index, current_edge_index, add_self_loops=True):
 
 class NodeNodeTextLayer(MessagePassing, ABC):
     def __init__(self, normalize=True):
-        super(NodeNodeTextLayer, self).__init__(aggr='add')
+        super(NodeNodeTextLayer, self).__init__()
         self.normalize = normalize
         self.activation = torch.nn.Sigmoid()
+        # init(agg='add') daniele
 
     def forward(self, x, edge_index, node_attr_rows, node_attr_cols, edge_attr):
         original_edge_index = edge_index
@@ -36,4 +37,5 @@ class NodeNodeTextLayer(MessagePassing, ABC):
         return self.propagate(edge_index, x=x)
 
     def message_and_aggregate(self, adj_t, x):
-        return matmul(adj_t, x, reduce=self.aggr)
+        # return matmul(adj_t, x, reduce=self.aggr) perchè ? Daniele
+        return matmul(adj_t, x)
